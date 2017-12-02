@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1512231144 source:c:\users\surya\desktop\sample learning\dda_line_drawing\main.cpp
+	<graphics.h>
+	<iostream>
+
