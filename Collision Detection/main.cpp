@@ -187,10 +187,10 @@ int main()
     /// Displaying information about movement control.
     cout<<"Movement Controller Buttons: Input here"<<endl<<endl;
     cout<<"--------------GREEN Ball------------"<<endl;
-    cout<<" Upward -> t"<<endl;
-    cout<<" Downward -> g"<<endl;
-    cout<<" Left -> f"<<endl;
-    cout<<" Right -> h"<<endl;
+    cout<<" Upward -> w"<<endl;
+    cout<<" Downward -> a"<<endl;
+    cout<<" Left -> s"<<endl;
+    cout<<" Right -> d"<<endl;
     cout<<"-------------------------------------"<<endl;
     cout<<" Press q to quit the game"<<endl;
     cout<<"-------------------------------------"<<endl<<endl;
