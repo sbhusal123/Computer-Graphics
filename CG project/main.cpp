@@ -99,23 +99,29 @@ class  game:protected gameObjects
     bool ballAtLeft, ballAtRight;
 
     bool ballAtTop, ballAtBottom;
+    float speed;
 
     ///--------------------------------------------------///
     void initializeData()
     {
+        cout<<"Enter the speed you wish to play with:(1,2,3)"<<endl;
+        cin>>speed;
+
+        speed = 1/speed;
+
         ballX = 41;
-        ballY = 130;
+        ballY = 72;
 
         player1.color = LIGHTCYAN;
         player1.x = 30;
-        player1.y0 = 100;
-        player1.y1 = 200;
+        player1.y0 = 72;
+        player1.y1 = 172;
 
 
         player2.color = LIGHTMAGENTA;
         player2.x = 600;
-        player2.y0 = 100;
-        player2.y1 = 200;
+        player2.y0 = 72;
+        player2.y1 = 172;
 
         ///  Basic setUp For Game and Game Screen
         ballBorderColor = RED;
@@ -186,8 +192,8 @@ class  game:protected gameObjects
                 if(player1.y0 > 60)
                 {
                     drawLine(player1.x,player1.y0,player1.x,player1.y1,background);
-                    player1.y0-=5;
-                    player1.y1-=5;
+                    player1.y0-=10;
+                    player1.y1-=10;
                 }
             }
             else if(keyPressed == 's')
@@ -195,8 +201,8 @@ class  game:protected gameObjects
                 if(player1.y1 < 470)
                 {
                     drawLine(player1.x,player1.y0,player1.x,player1.y1,background);
-                    player1.y0+=5;
-                    player1.y1+=5;
+                    player1.y0+=10;
+                    player1.y1+=10;
                 }
             }
 
@@ -294,12 +300,12 @@ class  game:protected gameObjects
             ballAtRight = true;
         }
 
-        if(ballY == 71)
+        if(ballY == 72)
         {
             ballAtBottom = false;
             ballAtTop = true;
         }
-        else if(ballY == 609 || ballY   == 130)
+        else if(ballY == 458)
         {
             ballAtTop = false;
             ballAtBottom = true;
@@ -314,12 +320,12 @@ class  game:protected gameObjects
         }
         else if(ballAtRight)
         {
-            ballX-=1;
+            ballX-=2;
         }
 
         if(ballAtTop)
         {
-            ballY += 1;
+            ballY +=1;
         }
         else if(ballAtBottom)
         {
@@ -327,8 +333,8 @@ class  game:protected gameObjects
         }
     }
 
-    void startBallMovement()
-    {
+    void startBallMovement(){
+
         while(true)
         {
             clearPreviousPositionOfBall(); ///clearing the previous position of ball.
@@ -336,7 +342,7 @@ class  game:protected gameObjects
             makeMovementPrediction(); /// based on user's strategy make movement prediction.
             ballPosition(); ///used to update the position of ball.
             makeScoreIncreamentAndDisplay(); ///upgrade the score of the player.
-            delay(2); /// used to delay the frame update.
+            delay(speed); /// used to delay the frame update.
         }
     }
     ///-----------------------------------------------///
