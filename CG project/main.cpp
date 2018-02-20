@@ -1,8 +1,8 @@
 #include<iostream>
 #include<conio.h>
-#include<conio.h>
 #include<fstream> /// for sprintf
 #include<graphics.h>
+#include<thread>
 using namespace std;
 int background = BLUE;
 class gameObjects
@@ -83,23 +83,27 @@ protected:
 
 class  game:protected gameObjects
 {
+    char scrdisp[10];
+    thread* t1;
     ///-------------------- Variables-------------------///
     char keyPressed = NULL;
     /// structure for holding player information.
     struct player
     {
-        int x, y0, y1,color;
+        int x, y0, y1,color,score;
     };
     player player1, player2;
     /// for ball
     int ballX, ballY,ballColor,ballBorderColor;
 
+    bool ballAtLeft, ballAtRight;
+
+    bool ballAtTop, ballAtBottom;
+
     ///--------------------------------------------------///
-
-
     void initializeData()
     {
-        ballX = 42;
+        ballX = 41;
         ballY = 130;
 
         player1.color = LIGHTCYAN;
@@ -118,7 +122,7 @@ class  game:protected gameObjects
         ballColor  = GREEN;
     }
 
-    void updateScoreBoard()
+    void displayScoreBoard()
     {
 
         /// whole score board border.
@@ -130,7 +134,8 @@ class  game:protected gameObjects
         floodfill(30,40,CYAN);
         setbkcolor(CYAN);
         setcolor(LIGHTGREEN);
-        outtextxy(35,20,"Score:0");
+        sprintf(scrdisp,"Score:%d",player1.score);
+        outtextxy(35,20,scrdisp);
 
         ///right score board.
         drawRect(323,11,619,49,LIGHTMAGENTA);
@@ -138,7 +143,8 @@ class  game:protected gameObjects
         floodfill(330,40,LIGHTMAGENTA);
         setbkcolor(LIGHTMAGENTA);
         setcolor(LIGHTGREEN);
-        outtextxy(350,20,"Score:1");
+        sprintf(scrdisp,"Score:%d",player2.score);
+        outtextxy(350,20,scrdisp);
     }
 
     void ballPosition()
@@ -168,6 +174,7 @@ class  game:protected gameObjects
     {
         playerBatPosition();
     }
+
 
     void startPlaying()
     {
@@ -217,23 +224,161 @@ class  game:protected gameObjects
     }
 
 
+    ///-------------------Threading call --------------///
+
+
+    void clearPreviousPositionOfBall()
+    {
+        setfillstyle(SOLID_FILL,background);
+        drawCircle(ballX,ballY,10,background); ///ball for game
+        floodfill(ballX,ballY,background);
+    }
+
+
+    void makeScoreIncreamentAndDisplay()
+    {
+        if(ballX == 41)
+        {
+            if( ballY >= player1.y0 && ballY <= player1.y1 )
+            {
+                player1.score++;
+                sprintf(scrdisp,"Score:%d",player1.score);
+                setbkcolor(CYAN);
+                outtextxy(35,20,scrdisp);
+                /***
+                Uncomment this to understand.
+                cout<<"Player 1 good"<<endl;
+                getch();
+                */
+            }
+            else
+            {
+
+                ///cout<<"Player 1 bad"<<endl; uncomment
+            }
+        }
+
+        if(ballX == 589)
+        {
+            if( ballY >= player2.y0 && ballY <= player2.y1 )
+            {
+                player2.score++;
+                sprintf(scrdisp,"Score:%d",player2.score);
+                setbkcolor(LIGHTMAGENTA);
+                outtextxy(350,20,scrdisp);
+                /***
+                uncomment
+                cout<<"Player 2 good"<<endl;
+                getch();
+                */
+            }
+            else
+            {
+                ///cout<<"Player 2 bad"<<endl; uncomment
+
+            }
+        }
+
+    }
+
+    void checkBallPosition()  ///checks whether the ball is at left or right.
+    {
+        if(ballX==41)
+        {
+            ballAtRight = false;
+            ballAtLeft = true;
+        }
+        else if(ballX == 589)
+        {
+            ballAtLeft = false;
+            ballAtRight = true;
+        }
+
+        if(ballY == 71)
+        {
+            ballAtBottom = false;
+            ballAtTop = true;
+        }
+        else if(ballY == 609 || ballY   == 130)
+        {
+            ballAtTop = false;
+            ballAtBottom = true;
+        }
+    }
+
+    void makeMovementPrediction()
+    {
+        if(ballAtLeft)
+        {
+            ballX+=1;
+        }
+        else if(ballAtRight)
+        {
+            ballX-=1;
+        }
+
+        if(ballAtTop)
+        {
+            ballY += 1;
+        }
+        else if(ballAtBottom)
+        {
+            ballY -=1;
+        }
+    }
+
+    void startBallMovement()
+    {
+        while(true)
+        {
+            clearPreviousPositionOfBall(); ///clearing the previous position of ball.
+            checkBallPosition(); /// check where the ball is.
+            makeMovementPrediction(); /// based on user's strategy make movement prediction.
+            ballPosition(); ///used to update the position of ball.
+            makeScoreIncreamentAndDisplay(); ///upgrade the score of the player.
+            delay(2); /// used to delay the frame update.
+        }
+    }
+    ///-----------------------------------------------///
+
+
 public:
     game()
     {
         cleardevice();
         initializeData();
         setBackground();
-        updateScoreBoard();
+        displayScoreBoard();
         playerBatPosition();
         ballPosition();
 
-        /// actual simulation starts from here.
+        /// starting the thread which maintains the ball movements.
+        t1 = new thread([this]() ///similar to the lambda expression in JAVA.
+        {
+            startBallMovement();
+        });
+
+        /** reference at
+        https://stackoverflow.com/questions/48878005/creating-a-thread-inside-the-class-in-c/48878172#48878172
+        */
+
+        /// actual simulation starts from here. Game play.
         startPlaying();
+    }
+
+    ~game()
+    {
+        if(t1 != nullptr)
+        {
+            t1 -> join(); ///wait till the main thread stops.
+            delete t1;
+        }
     }
 };
 class Screen: protected gameObjects
 {
     game* start;
+
     /// initializing the class variable without initializing the object.
     /// reference at https://stackoverflow.com/questions/800368/declaring-an-object-before-initializing-it-in-c.
 private:
